@@ -3,7 +3,6 @@
   <head>
     <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1/jquery.min.js"></script>
     <script type="text/javascript" src="gest.js"></script>
-    <meta charset=utf-8 />
     <title>gest - NaiveBayes Sentiment Classification Example</title>
     <script type="text/javascript">
 
@@ -42,15 +41,14 @@
 
       $(document).ready(function(){
 
-        var probdist = gest.train(train_samples)
+        gest.train(train_samples,function(){
 
-        console.log(probdist)
+          test_samples.forEach(function(sample){
+            var scores = gest.guess(sample)
+            $('body').append('<p>'+sample+'<br/> neg:'+scores.neg+' pos:'+scores.pos+'<\/p>')
+          })
 
-        test_samples.forEach(function(sample){
-          var scores = gest.guess(sample)
-          $('body').append('<p>'+sample+'<br\> neg:'+scores.neg+' pos:'+scores.pos+'</p>')
         })
-
 
       })
 

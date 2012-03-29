@@ -33,9 +33,9 @@ test_samples = [
   'Everything is fail today and I hate stuff'
 ]
 
-var probdist = gest.train(train_samples)
+gest.train(train_samples)
 
-console.log(probdist)
+console.log(gest.probdist)
 
 test_samples.forEach(function(sample){
   var scores = gest.guess(sample)

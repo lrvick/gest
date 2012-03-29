@@ -17,6 +17,7 @@
                     callback(JSON.parse(request.responseText))
                 }
             }
+            request.send(null)
         }
     }
 
@@ -63,15 +64,15 @@
     }
 
     // count all tokens in all samples by label
-    function train(samples){
+    function train(samples,callback){
 
         // load stopwords
         if (!gest.stopwords){
-            open('./stopwords.json',function(stopwords){
+            open('stopwords.json',function(stopwords){
                 gest.stopwords = stopwords['words']
-                train(samples)
-                return
+                train(samples,callback)
             })
+            return
         }
 
         gest.samples = samples
@@ -92,6 +93,10 @@
         });
 
         gest.probdist = probdist(tokens,totals)
+
+        if(callback){
+            callback()
+        }
 
         return gest.probdist
 
