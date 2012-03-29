@@ -2,6 +2,7 @@ var gest = (function(){
 
     var stopwords = ['i','in','and','to','are','the','but','my','they','those','them','you','a']
 
+    // take input text and output an array of alphanumeric non-stopword tokens
     function tokenize(sample){
 
         var tokens = []
@@ -15,6 +16,7 @@ var gest = (function(){
         return tokens
     }
 
+    // calculate probability distribution for each token by labels
     function probdist(tokens,totals){
         Object.keys(tokens).forEach(function(label){
             for (token in tokens[label]){
@@ -26,6 +28,7 @@ var gest = (function(){
         return tokens
     }
 
+    // take a sample text string, then output the label probabilities
     function guess(sample){
 
         scores = {}
@@ -40,6 +43,7 @@ var gest = (function(){
         return scores
     }
 
+    // count all tokens in all samples by label
     function train(samples){
 
         gest.samples = samples
