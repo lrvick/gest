@@ -1,6 +1,24 @@
-var gest = (function(){
+(function(root){
 
-    var stopwords = ['i','am','at','me','so','is','of','for','in','and','to','are','the','but','my','they','those','them','you','a']
+    var gest  = typeof exports != 'undefined'?  exports : root.gest = { };
+
+    var fs  = typeof require == 'function' && require('fs');
+
+    // open a JSON file using XMLHTTPrequest or the node fs module as needed
+    function open(path,callback){
+        if (fs){
+            var contents = fs.readFileSync(path);
+            callback(JSON.parse(contents))
+        } else {
+            var request = new XMLHttpRequest();
+            request.open("GET",path,true);
+            request.onreadystatechange = function(){
+                if (request.readyState==4){
+                    callback(JSON.parse(request.responseText))
+                }
+            }
+        }
+    }
 
     // take input text and output an array of alphanumeric non-stopword tokens
     function tokenize(sample){
@@ -47,6 +65,15 @@ var gest = (function(){
     // count all tokens in all samples by label
     function train(samples){
 
+        // load stopwords
+        if (!gest.stopwords){
+            open('./stopwords.json',function(stopwords){
+                gest.stopwords = stopwords['words']
+                train(samples)
+                return
+            })
+        }
+
         gest.samples = samples
 
         var tokens = {}
@@ -70,10 +97,7 @@ var gest = (function(){
 
     }
 
-    return {
-        guess : guess,
-        train : train,
-        stopwords : stopwords,
-    }
+    gest.guess = guess;
+    gest.train = train;
 
-}())
+})(this)
