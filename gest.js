@@ -1,6 +1,6 @@
 var gest = (function(){
 
-    var stopwords = ['i','in','and','to','are','the','but','my','they','those','them','you','a']
+    var stopwords = ['i','am','at','me','so','is','of','for','in','and','to','are','the','but','my','they','those','them','you','a']
 
     // take input text and output an array of alphanumeric non-stopword tokens
     function tokenize(sample){
@@ -8,8 +8,9 @@ var gest = (function(){
         var tokens = []
 
         sample.split(' ').forEach(function(token){
-            if (gest.stopwords.indexOf(token) & /^[a-zA-Z0-9]+$/.test(token)){
-                tokens.push(token.toLowerCase())
+            var token = token.toLowerCase()
+            if (gest.stopwords.indexOf(token) == -1 && /^[a-zA-Z0-9]+$/.test(token)){
+                tokens.push(token)
             }
         })
 
