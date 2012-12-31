@@ -3,6 +3,7 @@
   <head>
     <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1/jquery.min.js"></script>
     <script type="text/javascript" src="../src/gest.core.js"></script>
+    <script type="text/javascript" src="../src/gest.model.js"></script>
     <script type="text/javascript" src="../src/preprocessors/StringTokenizer.js"></script>
     <script type="text/javascript" src="../src/classifiers/NaiveBayes.js"></script>
 
@@ -44,29 +45,16 @@
 
       $(document).ready(function(){
 
-        var calculated_probdist_json = '{"pos":{"love":{"c":3,"p":0.1111111111111111},"mommy":{"c":1,"p":0.037037037037037035},"amazing":{"c":1,"p":0.037037037037037035},"person":{"c":2,"p":0.07407407407407407},"good":{"c":2,"p":0.07407407407407407},"win":{"c":1,"p":0.037037037037037035},"everything":{"c":1,"p":0.037037037037037035},"want":{"c":3,"p":0.1111111111111111},"people":{"c":1,"p":0.037037037037037035},"things":{"c":1,"p":0.037037037037037035},"gbu":{"c":1,"p":0.037037037037037035},"rich":{"c":1,"p":0.037037037037037035},"chase":{"c":1,"p":0.037037037037037035},"butterflies":{"c":1,"p":0.037037037037037035},"since":{"c":1,"p":0.037037037037037035},"make":{"c":2,"p":0.07407407407407407},"happy":{"c":1,"p":0.037037037037037035},"hug":{"c":1,"p":0.037037037037037035},"bunnies":{"c":1,"p":0.037037037037037035},"smile":{"c":1,"p":0.037037037037037035}},"neg":{"fail":{"c":1,"p":0.037037037037037035},"everything":{"c":1,"p":0.037037037037037035},"want":{"c":3,"p":0.1111111111111111},"kill":{"c":2,"p":0.07407407407407407},"people":{"c":1,"p":0.037037037037037035},"sad":{"c":2,"p":0.07407407407407407},"things":{"c":1,"p":0.037037037037037035},"fml":{"c":1,"p":0.037037037037037035},"hate":{"c":2,"p":0.07407407407407407},"bad":{"c":1,"p":0.037037037037037035},"person":{"c":2,"p":0.07407407407407407},"mommy":{"c":1,"p":0.037037037037037035},"terrible":{"c":1,"p":0.037037037037037035},"butterflies":{"c":1,"p":0.037037037037037035},"since":{"c":1,"p":0.037037037037037035},"make":{"c":2,"p":0.07407407407407407},"hurt":{"c":1,"p":0.037037037037037035},"bunnies":{"c":1,"p":0.037037037037037035},"poor":{"c":1,"p":0.037037037037037035},"frown":{"c":1,"p":0.037037037037037035}}}';
 
-        var tokenizer = new gest.preprocessors.StringTokenizer()
-//        var sentiment = new gest.classifiers.NaiveBayes({
-//            probdist: JSON.parse(calculated_probdist_json)
-//        })
-        var sentiment = new gest.classifiers.NaiveBayes()
+        var sentiment_model = new gest.Model({
+            classifier: 'NaiveBayes',
+            preprocessors: [ 'StringTokenizer' ]
+        })
 
-        var tokenized_training_samples = { pos: [], neg: [] }
-
-        for (var label in train_samples) {
-            var arr = []
-            train_samples[label].forEach(function(str) {
-                arr.push(tokenizer(str))
-            })
-            train_samples[label] = arr
-        }
-        
-        sentiment.trainBatch(train_samples)
+        sentiment_model.trainBatch(train_samples)
 
         test_samples.forEach(function(sample){
-            var instance = tokenizer(sample)
-            var scores = sentiment.classify(instance)
+            var scores = sentiment_model.guess(sample)
             $('body').append('<p>'+sample+'<br/> neg:'+scores.neg+' pos:'+scores.pos+'<\/p>')
         })
 
