@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1/jquery.min.js"></script>
+    <script type="text/javascript" src="src/gest.core.js"></script>
+    <script type="text/javascript" src="src/preprocessors/StringTokenizer.js"></script>
+    <script type="text/javascript" src="src/classifiers/NaiveBayes.js"></script>
+
+    <title>gest - NaiveBayes Sentiment Classification Example</title>
+    <script type="text/javascript">
+
+      train_samples = {
+        'pos' : [
+          'I love you mommy ! You are my amazing person',
+          'I love you and you are a good person',
+          'I win at everything and I want to love people',
+          'good are things are heppening. gbu',
+          'I am so rich',
+          'I want to chase butterflies since they make me happy',
+          'I want to hug bunnies',
+          'You make me smile'
+        ],
+        'neg' : [
+          'I fail at everything and I want to kill people',
+          'sad are things are heppening. fml',
+          'I hate you and you are a bad person',
+          'I hate you mommy ! You are my terrible person',
+          'I want to kill butterflies since they make me sad',
+          'I want to hurt bunnies',
+          'I am so poor',
+          'You make me frown'
+        ]
+      }
+
+      test_samples = [
+        'You are a terrible person and everything you do is bad',
+        'I love you all and you make me happy',
+        'I frown whenever I see you in a poor state of mind',
+        'Finally getting rich from my ideas. They make me smile.',
+        'My mommy is poor',
+        'I love butterflies. Yay for happy',
+        'Everything is fail today and I hate stuff'
+      ]
+
+      $(document).ready(function(){
+
+        var calculated_probdist_json = '{"pos":{"love":{"c":3,"p":0.1111111111111111},"mommy":{"c":1,"p":0.037037037037037035},"amazing":{"c":1,"p":0.037037037037037035},"person":{"c":2,"p":0.07407407407407407},"good":{"c":2,"p":0.07407407407407407},"win":{"c":1,"p":0.037037037037037035},"everything":{"c":1,"p":0.037037037037037035},"want":{"c":3,"p":0.1111111111111111},"people":{"c":1,"p":0.037037037037037035},"things":{"c":1,"p":0.037037037037037035},"gbu":{"c":1,"p":0.037037037037037035},"rich":{"c":1,"p":0.037037037037037035},"chase":{"c":1,"p":0.037037037037037035},"butterflies":{"c":1,"p":0.037037037037037035},"since":{"c":1,"p":0.037037037037037035},"make":{"c":2,"p":0.07407407407407407},"happy":{"c":1,"p":0.037037037037037035},"hug":{"c":1,"p":0.037037037037037035},"bunnies":{"c":1,"p":0.037037037037037035},"smile":{"c":1,"p":0.037037037037037035}},"neg":{"fail":{"c":1,"p":0.037037037037037035},"everything":{"c":1,"p":0.037037037037037035},"want":{"c":3,"p":0.1111111111111111},"kill":{"c":2,"p":0.07407407407407407},"people":{"c":1,"p":0.037037037037037035},"sad":{"c":2,"p":0.07407407407407407},"things":{"c":1,"p":0.037037037037037035},"fml":{"c":1,"p":0.037037037037037035},"hate":{"c":2,"p":0.07407407407407407},"bad":{"c":1,"p":0.037037037037037035},"person":{"c":2,"p":0.07407407407407407},"mommy":{"c":1,"p":0.037037037037037035},"terrible":{"c":1,"p":0.037037037037037035},"butterflies":{"c":1,"p":0.037037037037037035},"since":{"c":1,"p":0.037037037037037035},"make":{"c":2,"p":0.07407407407407407},"hurt":{"c":1,"p":0.037037037037037035},"bunnies":{"c":1,"p":0.037037037037037035},"poor":{"c":1,"p":0.037037037037037035},"frown":{"c":1,"p":0.037037037037037035}}}';
+
+        var tokenizer = new gest.preprocessors.StringTokenizer()
+        var sentiment = new gest.classifiers.NaiveBayes({
+            probdist: JSON.parse(calculated_probdist_json)
+        })
+
+        test_samples.forEach(function(sample){
+            var instance = tokenizer(sample)
+            var scores = sentiment.classify(instance)
+            $('body').append('<p>'+sample+'<br/> neg:'+scores.neg+' pos:'+scores.pos+'<\/p>')
+        })
+
+      })
+
+    </script>
+  </head>
+  <body></body>
+</html>
