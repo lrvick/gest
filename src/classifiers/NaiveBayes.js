@@ -12,7 +12,11 @@
      *   { probdist: { attribute: probability, ... } }
      */
     function NaiveBayes(opts) {
-        this.probdist = opts.probdist
+        if (typeof opts != "object") opts = {}
+
+        if ('probdist' in opts) {
+            this.probdist = opts.probdist
+        }
         // attributes
         // labels
         // probdist
@@ -45,8 +49,48 @@
     }
 
     /**
-     * Train a new instance into the classifier. The instance parameter is expeced
+     * Train a new instance into the classifier. The instance parameter is expected
      * to already have been through a preprocessor.
+     * 
+     * @param {hash} labeldata Hash with labels and keys and attributes-hashes as 
+     *    values, ex:
+     *      { pos: { attribute: value, ... }
+     *      , neg: { attribute: value, ... } }
+     *    Attributes that are in the classifier's list but not in this list
+     *    will be treated as 0. Attributes that are in this list but not in the 
+     *    classifier will be added.
+     */
+    NaiveBayes.prototype.trainBatch = function(instances) {
+        var tokens = {}
+        var totals = {}
+
+        for (var label in instances) {
+            tokens[label] = {}
+            totals[label] = 0
+            
+            instances[label].forEach(function(attributes) {
+                for (var attribute in attributes) {
+                    // TODO: handle attributes better.
+                    // Bayes should be able to handle numeric attributes,
+                    // boolean attributes, nominal attributes, ...
+                    // for now I'm just assuming that if it exists in the hash
+                    // and has a value that is not 0 it is intended as a 1
+                    if (attributes[attribute] != 0) {
+                        tokens[label][attribute] = tokens[label][attribute] || {'c': 0}
+                        tokens[label][attribute]['c']++
+                        totals[label]++
+                    }
+                }
+            })
+        }
+
+        this.probdist = this.calculateProbdist(tokens, totals)
+
+        return this.probdist
+    }
+
+    /**
+     * Calculate the probability distribution for tokens by labels
      * 
      * @param {hash} instance Hash of attributes with format { attribute: value, 
      *    ... }. Attributes that are in the classifier's list but not in this list
@@ -55,9 +99,17 @@
      * @param {string} label The name of the label that was externally found to be 
      *    associated with this instance
      */
-    NaiveBayes.prototype.train = function(instance, label) {
-        
+    NaiveBayes.prototype.calculateProbdist = function(tokens, totals) {
+        Object.keys(tokens).forEach(function(label) {
+            for (token in tokens[label]) {
+                var prob = tokens[label][token]['c'] / totals[label]
+                tokens[label][token]['p'] = prob
+            }
+        })
+
+        return tokens
     }
+    
 
     gest.classifiers.NaiveBayes = NaiveBayes
 

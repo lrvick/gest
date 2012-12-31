@@ -37,6 +37,7 @@
             str.split(' ').forEach(function(token){
                 var token = token.toLowerCase()
                 if (stopwords.indexOf(token) == -1 && /^[a-zA-Z0-9]+$/.test(token)){
+                    // TODO: make this a word count or something?
                     tokens[token] = 1
                 }
             })
