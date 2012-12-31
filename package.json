@@ -2,11 +2,14 @@
     "name" : "gest",
     "description" : "Javascript library designed for doing sentiment analysis using NaiveBayes classification",
     "tags" : ["nlp", "ml", "sentiment", "naive", "bayes"],
-    "version" : "0.1",
+    "version" : "0.0.1",
     "author" : "Lance R. Vick <lance@lrvick.net>",
     "repository" : {
         "type" : "git",
         "url" : "http://github.com/Tawlk/gest.git"
+    },
+    "dependencies": {
+        "grunt": ""
     },
     "bugs" : { "web" : "http://github.com/Tawlk/gest/issues" },
     "engines" : ["node >= 0.3.6"],

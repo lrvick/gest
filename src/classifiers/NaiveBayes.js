@@ -2,6 +2,17 @@
 
     var gest = (typeof require == 'function' && !(typeof define == 'function' && define.amd)) ? require('../src/gest.core.js') : root.gest
 
+
+    /**
+     * 
+     * Classifier:
+     *   constructor
+     *   classify function
+     *   trainBatch function
+     *
+     */
+
+
     /**
      * Creates instance of NaiveBayes classifier from provided probdist
      *
@@ -17,10 +28,6 @@
         if ('probdist' in opts) {
             this.probdist = opts.probdist
         }
-        // attributes
-        // labels
-        // probdist
-        
     }
 
     /**
