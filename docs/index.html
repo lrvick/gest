@@ -1,0 +1,220 @@
+<!DOCTYPE html><html><head><title>gest - a javascript machine learning toolkit </title><meta http-equiv="Content-Type" content="text/html; charset=utf-8"><link rel="stylesheet" href="style.css"><script src="jquery.js"></script><script src="docs.js"></script></head><body><div id="content"><h1>gest</h1><div id="" class="comment"><h2></h2><div class="description"><p>fromIndex</p></div><h3 class="show_source">(source)</h3><pre><code>) {
+            "use strict"
+            if (this === null) {
+                throw new TypeError()
+            }
+            var t = Object(this)
+            var len = t.length >>> 0
+            if (len === 0) {
+                return -1
+            }
+            var n = 0
+            if (arguments.length > 0) {
+                n = Number(arguments[1])
+                if (isNaN(n)) { // shortcut for verifying if it's NaN
+                    n = 0
+                } else if (n !== 0 && n !== Infinity && n !== -Infinity) {
+                    n = (n > 0 || -1) * Math.floor(Math.abs(n))
+                }
+            }
+            if (n >= len) {
+                return -1
+            }
+            var k = n >= 0 ? n : Math.max(len - Math.abs(n), 0)
+            for (; k < len; k++) {
+                if (k in t && t[k] === searchElement) {
+                    return k
+                }
+            }
+            return -1
+        }
+    }
+
+    // Converts an object to an array
+    function oc(a){
+       var obj = {}
+       for(var i=0;i<a.length;i++){
+            obj[a[i]]=''
+       }
+       return obj
+    }
+
+    // Fills a template with data from an object
+    function format(string, data) {
+        "use strict"
+        return string.replace(
+            /\{\{(?:#(.+?)#)?\s*(.+?)\s*\}\}/g,
+            function(m, cond, id) {
+                var rv = data[id]
+                if (rv === false){
+                    return ''
+                } else {
+                    return rv? (cond || '') + rv : cond? m : ''
+                }
+            }
+       )
+    }
+
+    // Exports data to the outside world
+    gest.classifiers = {}
+    gest.preprocessors = {}
+
+    // Export gest for node/browser compatibilty
+    if (typeof module !== 'undefined' && module.exports) {
+        module.exports = gest
+    } else {
+        root.gest = gest
+    }
+
+})(this)
+(function(root) {
+
+    var gest = (typeof require == 'function' && !(typeof define == 'function' && define.amd)) ? require('../src/gest.core.js') : root.gest</code></pre></div><div id="Model" class="comment"><h2>Model()</h2><div class="description"><p>Creates instance of a gest Model. A gest Model is a combination of preprocessors,<br />classifiers, and classifier defitional data that can simplify the use of <br />classifiers and preprocessors. Usually, you will be using something like:</p>
+
+<p>var sentiment_model = new Model(<br />  { classifier: "NaiveBayes"<br />  , preprocessors: [ "StringTokenizer"<br />  , classifierData: {  ...  }<br />})<br />sentiment_model.guess("This is a full string and it is a very good string")<br />// => { pos: 0.9, neg: 0.1 }<br />sentiment_model.guess("This is a another string that I am very fond of")<br />// => { pos: 0.8, neg: 0.1 }</p></div><ul class="tags"><li><em>hash</em> opts JSON object with at least a &quot;probdist&quot; key mapped to a</li></ul><h3 class="show_source">(source)</h3><pre><code>function Model(opts) {
+        this.preprocessors = []
+        for( var i=0; i<opts.preprocessors.length; i++) {
+            // create instance of all our preprocessors
+            this.preprocessors.push(new gest.preprocessors[opts.preprocessors[i]])
+        }
+
+        // create an instance of our classifier
+        this.classifier = new gest.classifiers[opts.classifier](opts.classifierData)
+    }</code></pre></div><div id="Model.prototype.guess" class="comment"><h2>Model#guess()</h2><div class="description"><p>Return a best-guess prediction based on the given instance data.</p></div><ul class="tags"><li><em>hash</em> instance Hash of attributes and values, in the format</li></ul><h3 class="show_source">(source)</h3><pre><code>Model.prototype.guess = function(instance) {
+        instance = this.preprocess(instance)
+
+        // classify the preprocessed instance
+        return this.classifier.classify(instance)
+    }</code></pre></div><div id="Model.prototype.trainBatch" class="comment"><h2>Model#trainBatch()</h2><div class="description"><p>Train this model with a batch of training instances</p></div><ul class="tags"><li><em>hash</em> instances Hash of labels and attributes, in the format</li></ul><h3 class="show_source">(source)</h3><pre><code>Model.prototype.trainBatch = function(instances) {
+        for (var label in instances) {
+            for (var i=0; i<instances[label].length; i++) {
+                instances[label][i] = this.preprocess(instances[label][i])
+            }
+        }
+
+        this.classifier.trainBatch(instances)
+    }</code></pre></div><div id="Model.prototype.preprocess" class="comment"><h2>Model#preprocess()</h2><div class="description"><p>Run an instance through the chain of preprocessors</p></div><ul class="tags"><li><em>hash</em> instance Hash of attributes for a given instance of data</li><li>returns <em>hash</em> Modified / transformed instance data</li></ul><h3 class="show_source">(source)</h3><pre><code>Model.prototype.preprocess = function(instance) {
+        // run the instance through the preprocessing chain
+        this.preprocessors.forEach(function(p) {
+            instance = p(instance)
+        })
+        return instance
+    }
+
+    // exports
+    gest.Model = Model
+
+})(this)
+(function(root) {
+
+    var gest = (typeof require == 'function' && !(typeof define == 'function' && define.amd)) ? require('../src/gest.core.js') : root.gest</code></pre></div><div id="" class="comment"><h2></h2><div class="description"><p>Classifier:<br />  constructor<br />  classify function<br />  trainBatch function</p></div></div><div id="NaiveBayes" class="comment"><h2>NaiveBayes()</h2><div class="description"><p>Creates instance of NaiveBayes classifier from provided probdist</p></div><ul class="tags"><li><em>hash</em> opts JSON object with at least a &quot;probdist&quot; key mapped to a</li></ul><h3 class="show_source">(source)</h3><pre><code>function NaiveBayes(opts) {
+        if (typeof opts != "object") opts = {}
+
+        if ('probdist' in opts) {
+            this.probdist = opts.probdist
+        }
+    }</code></pre></div><div id="NaiveBayes.prototype.classify" class="comment"><h2>NaiveBayes#classify()</h2><div class="description"><p>Classify an instance</p></div><ul class="tags"><li><em>hash</em> instance Hash of attributes with format { attribute: value, </li></ul><h3 class="show_source">(source)</h3><pre><code>NaiveBayes.prototype.classify = function(instance) {
+        var scores = {}
+
+        for (var label in this.probdist) {
+            scores[label] = 0
+            for (var attr in instance) {
+                if (attr in this.probdist[label]) {
+                    scores[label] += this.probdist[label][attr]['p']
+                }
+            }
+        }
+
+        return scores
+    }</code></pre></div><div id="NaiveBayes.prototype.trainBatch" class="comment"><h2>NaiveBayes#trainBatch()</h2><div class="description"><p>Train a new instance into the classifier. The instance parameter is expected<br />to already have been through a preprocessor.</p></div><ul class="tags"><li><em>hash</em> labeldata Hash with labels and keys and attributes-hashes as </li></ul><h3 class="show_source">(source)</h3><pre><code>NaiveBayes.prototype.trainBatch = function(instances) {
+        var tokens = {}
+        var totals = {}
+
+        for (var label in instances) {
+            tokens[label] = {}
+            totals[label] = 0
+            
+            instances[label].forEach(function(attributes) {
+                for (var attribute in attributes) {
+                    // TODO: handle attributes better.
+                    // Bayes should be able to handle numeric attributes,
+                    // boolean attributes, nominal attributes, ...
+                    // for now I'm just assuming that if it exists in the hash
+                    // and has a value that is not 0 it is intended as a 1
+                    if (attributes[attribute] != 0) {
+                        tokens[label][attribute] = tokens[label][attribute] || {'c': 0}
+                        tokens[label][attribute]['c']++
+                        totals[label]++
+                    }
+                }
+            })
+        }
+
+        this.probdist = this.calculateProbdist(tokens, totals)
+
+        return this.probdist
+    }</code></pre></div><div id="NaiveBayes.prototype.calculateProbdist" class="comment"><h2>NaiveBayes#calculateProbdist()</h2><div class="description"><p>Calculate the probability distribution for tokens by labels</p></div><ul class="tags"><li><em>hash</em> instance Hash of attributes with format { attribute: value, </li><li><em>string</em> label The name of the label that was externally found to be </li></ul><h3 class="show_source">(source)</h3><pre><code>NaiveBayes.prototype.calculateProbdist = function(tokens, totals) {
+        Object.keys(tokens).forEach(function(label) {
+            for (token in tokens[label]) {
+                var prob = tokens[label][token]['c'] / totals[label]
+                tokens[label][token]['p'] = prob
+            }
+        })
+
+        return tokens
+    }
+    
+
+    gest.classifiers.NaiveBayes = NaiveBayes
+
+})(this)
+(function(root) {
+
+    var gest = (typeof require == 'function' && !(typeof define == 'function' && define.amd)) ? require('../src/gest.core.js') : root.gest</code></pre></div><div id="StringTokenizer" class="comment"><h2>StringTokenizer()</h2><div class="description"><p>Creates instance of StringTokenizer preprocessor<br />It mostly splits strings into words and removes stopwords</p></div><ul class="tags"><li><em>hash</em> opts JSON object with configuration parameters for this tokenizer</li></ul><h3 class="show_source">(source)</h3><pre><code>function StringTokenizer(opts) {
+        if( typeof opts != 'object' ) {
+            opts = {}
+        }
+
+        // if no stopwords are specified, use the default
+        if ( !('stopwords' in opts) ) {
+            opts.stopwords = StringTokenizer.stopwords
+        }
+
+        return function(str) {
+            var tokens = {}
+
+            str.split(' ').forEach(function(token){
+                var token = token.toLowerCase()
+                if (opts.stopwords.indexOf(token) == -1 && /^[a-zA-Z0-9]+$/.test(token)){
+                    // TODO: make this a word count or something?
+                    tokens[token] = 1
+                }
+            })
+
+            return tokens
+        }
+    }
+
+    StringTokenizer.stopwords = [
+        "i","me","my","myself","we","our","ours","ourselves",
+        "you","your","yours","yourself","yourselves","he","him","his",
+        "himself","she","her","hers","herself","it","its","itself",
+        "they","them","their","theirs","themselves","what","which",
+        "who","whom","this","that","these","those","am","is","are",
+        "was","were","be","been","being","have","has","had","having",
+        "do","does","did","doing","a","an","the","and","but","if",
+        "or","because","as","until","while","of","at","by","for",
+        "with","about","against","between","into","through","during",
+        "before","after","above","below","to","from","up","down","in",
+        "out","on","off","over","under","again","further","then",
+        "once","here","there","when","where","why","how","all","any",
+        "both","each","few","more","most","other","some","such","no",
+        "nor","not","only","own","same","so","than","too","very","s",
+        "t","can","will","just","don","should","now"
+    ]
+
+
+
+    gest.preprocessors.StringTokenizer = StringTokenizer
+
+})(this)</code></pre></div></div><div id="menu"><h3>menu</h3><ul><li id=""></li><li id="Model">Model()</li><li id="Model.prototype.guess">Model#guess()</li><li id="Model.prototype.trainBatch">Model#trainBatch()</li><li id="Model.prototype.preprocess">Model#preprocess()</li><li id=""></li><li id="NaiveBayes">NaiveBayes()</li><li id="NaiveBayes.prototype.classify">NaiveBayes#classify()</li><li id="NaiveBayes.prototype.trainBatch">NaiveBayes#trainBatch()</li><li id="NaiveBayes.prototype.calculateProbdist">NaiveBayes#calculateProbdist()</li><li id="StringTokenizer">StringTokenizer()</li></ul></div></body></html>

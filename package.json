@@ -9,7 +9,9 @@
         "url" : "http://github.com/Tawlk/gest.git"
     },
     "dependencies": {
-        "grunt": ""
+        "grunt": "",
+        "jade": "",
+        "dox": ""
     },
     "bugs" : { "web" : "http://github.com/Tawlk/gest/issues" },
     "engines" : ["node >= 0.3.6"],
